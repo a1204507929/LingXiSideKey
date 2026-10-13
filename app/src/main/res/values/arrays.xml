@@ -1,0 +1,6 @@
+<resources>
+    <string-array name="xposed_scope">
+        <item>android</item>
+        <item>com.coloros.shortcuts</item>
+    </string-array>
+</resources>

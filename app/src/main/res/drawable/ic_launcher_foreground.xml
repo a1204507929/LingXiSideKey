@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   灵犀按键自定义 —— 图标前景
+   设计：白色侧边按键（竖条 + 高光）向右发出两道信号波纹（灵犀 = 心领神会的无形信号），
+   右上角一颗闪电代表「一击即达」。
+   安全区：108dp 画布，中心 72dp 圆内为可视安全区。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 侧边按键：圆角竖条 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M40,30 C34.5,30 31,33.6 31,39.2 L31,68.8 C31,74.4 34.5,78 40,78 C45.5,78 49,74.4 49,68.8 L49,39.2 C49,33.6 45.5,30 40,30 Z" />
+    <!-- 按键内凹描边，形成立体感 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00000000"
+        android:pathData="M0,0 Z" />
+    <path
+        android:fillColor="#FF2E6BD6"
+        android:pathData="M40,35.5 C37.4,35.5 36.2,37.4 36.2,39.6 L36.2,68.4 C36.2,70.6 37.4,72.5 40,72.5 C42.6,72.5 43.8,70.6 43.8,68.4 L43.8,39.6 C43.8,37.4 42.6,35.5 40,35.5 Z" />
+
+    <!-- 第一道信号波纹 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:pathData="M56,42 C60.5,48 60.5,60 56,66" />
+    <!-- 第二道信号波纹 （更淡，用白色 alpha 表现） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CCFFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:pathData="M64,36 C71,45.5 71,62.5 64,72" />
+
+    <!-- 闪电：一击即达 -->
+    <path
+        android:fillColor="#FFE24C"
+        android:pathData="M78,28 L68.5,45.5 L75.5,45.5 L71.5,60 L84.5,39.5 L77.5,39.5 Z" />
+</vector>

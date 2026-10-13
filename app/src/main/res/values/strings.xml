@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">灵犀按键自定义</string>
+    <string name="xposed_description">为 OPPO / 一加「灵犀」侧边按键自定义单击、双击与长按动作</string>
+</resources>
