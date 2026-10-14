@@ -1,5 +1,7 @@
 # 灵犀按键自定义
 
+> **仅支持 OPPO K15 系列机型**（已在 OPPO K15 Pro+ / ColorOS 16 / Android 16 上验证）。其它机型的灵犀键拦截点不同，可能无法生效。
+
 当初就是冲着 OPPO K15 Pro+ 的造型买的，到手最喜欢侧面那颗「灵犀」按键，结果发现它能干的事太少，于是自己写了个 App：基于 Xposed/LSPosed 框架，给灵犀键自定义单击、双击、长按动作，桌面与息屏均可用，游戏内自动放行原厂灵犀功能。按键拦截与动作执行运行在系统框架进程中，设置界面用 Compose 编写。包名 `io.github.a1204507929.lingxikey`。
 
 > 本模块基于 [SlimeNull/OppoCustomSideButtonFunctions](https://github.com/SlimeNull/OppoCustomSideButtonFunctions) 二次开发，
