@@ -2,7 +2,20 @@
 
 通过 Xposed/LSPosed 为 OPPO / 一加 等设备的「灵犀」侧边按键配置操作，区分单击、双击与长按，桌面与息屏均可用，游戏内保留原厂灵犀功能。应用提供 Compose 设置界面，按键拦截与动作执行主要运行在 Android 系统框架进程中。包名为 `com.lingxikey.custom`。
 
-> 本模块基于 [SlimeNull/OppoCustomSideButtonFunctions](https://github.com/SlimeNull/OppoCustomSideButtonFunctions) 二次开发，针对 OPPO K15 Pro+（ColorOS 16 / 灵犀键）重新适配了按键拦截点与手势码，并新增相机快门、内置散热风扇、小布助手、按应用配置等能力。在此感谢原作者的出色工作。
+> 本模块基于 [SlimeNull/OppoCustomSideButtonFunctions](https://github.com/SlimeNull/OppoCustomSideButtonFunctions) 二次开发，
+> 针对 OPPO K15 Pro+（ColorOS 16 / Android 16）重新适配了按键拦截点与手势码。在此感谢原作者的出色工作。
+>
+> **本项目（fork）改动：**
+> 1. 适配 OPPO K15 Pro+（重写按键拦截，单击 / 双击 / 长按自定义，游戏模式放行原厂行为）；
+> 2. 新增「打开应用」（自选任意 App）、「灯效开关」、「打开游戏助手」、「切换散热风扇」动作；
+> 3. 散热风扇改用系统原厂方式控制，切换时与原厂一致，**有流体云胶囊通知**、任务栏磁贴同步；
+> 4. 按应用配置：可为指定应用单独设置按键功能（优先于全局）；
+> 5. 按下即振动：单击一下、双击两下、长按持续振动（松手停）；
+> 6. 全新界面皮肤；功能为「打开应用」时主界面显示为 `打开应用(应用名)`；
+> 7. 高级设置：作用域检查与一键申请、配置 JSON 导入 / 导出；
+> 8. 首页显示 Root 与框架激活状态，Root 未激活可跳转 GhostLock，框架未生效可一键软重启修复。
+>
+> 开源地址：<https://github.com/a1204507929/LingXiSideKey>
 
 <div align="center">
   <img src="images/preview.webp" alt="preview image" >
@@ -51,9 +64,21 @@
 
 简单模式的双击等待时间和长按等待时间默认均为 300ms，设置范围均为 100~800ms。
 
-“高级设置”可配置按键码、输入设备路径，以及息屏时是否唤醒设备。默认按键码为 `735`、输入路径为 `/dev/input/event0`，息屏唤醒默认关闭。
+“高级设置”提供作用域检查（结果以 Toast 提示，支持一键申请作用域或跳转框架管理器手动勾选）、
+配置导入 / 导出（JSON 格式，包含手势动作、按应用配置与全部参数），以及配置备份。
+按键码（`672`，KEY_MACRO17）与输入设备路径（`/dev/input/event2`）已内置在程序中，不再作为配置项。
 
-底部导航的第二个页面为“关于”，保留开发者信息，并提供 GNU Lesser General Public License v3.0 许可证页面和项目仓库入口：`https://github.com/SlimeNull/OppoCustomSideButtonFunctions`。
+底部导航的第二个页面为“关于”，展示本项目的开源地址
+（`https://github.com/a1204507929/LingXiSideKey`）、原项目信息与改动说明，
+并提供 GNU Lesser General Public License v3.0 许可证入口。
+
+## 环境状态
+
+首页标题下方显示两个状态方框：
+
+- **Root (KSU)**：检测 root 是否已激活；未激活时点击可跳转 GhostLock。
+- **框架**：显示模块注入状态与已安装的框架管理器名称（Vector / LSPosed）；
+  已安装但未生效时点击会询问是否软重启尝试恢复，未安装则提示先安装框架。
 
 ## 兼容性与权限
 
@@ -73,4 +98,7 @@
 .\gradlew.bat :app:assembleRelease
 ```
 
-产物位于 `app/build/outputs/apk/debug/` 或 `app/build/outputs/apk/release/`。Release 构建使用 `keystore/keystore.properties` 中配置的签名信息。
+产物位于 `app/build/outputs/apk/debug/` 或 `app/build/outputs/apk/release/`。
+Release 构建使用 `keystore/keystore.properties` 中配置的签名信息；仓库出于安全考虑未包含签名文件，
+如需构建 Release 请自行放置 `keystore/custom-side-button.jks` 与 `keystore/keystore.properties`，
+或直接使用 Debug 构建。

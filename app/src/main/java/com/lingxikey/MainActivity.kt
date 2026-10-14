@@ -1272,7 +1272,7 @@ private fun launchFrameworkManager(context: Context) {
 }
 
 /** 本项目的开源仓库地址（「关于」页展示与跳转）。 */
-private const val OPEN_SOURCE_URL = "https://github.com/PLACEHOLDER/LingXiSideKey"
+private const val OPEN_SOURCE_URL = "https://github.com/a1204507929/LingXiSideKey"
 
 @Composable
 private fun AboutScreen(padding: PaddingValues) {
@@ -1300,7 +1300,7 @@ private fun AboutScreen(padding: PaddingValues) {
              Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, AppBorder)) {
                 Column(Modifier.fillMaxWidth().padding(14.dp)) {
                     Text("开源地址", style = MaterialTheme.typography.labelMedium, color = AppMuted)
-                    Text("github.com/PLACEHOLDER/LingXiSideKey", modifier = Modifier.padding(top = 4.dp))
+                    Text("github.com/a1204507929/LingXiSideKey", modifier = Modifier.padding(top = 4.dp))
                     HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFEAF0F7))
                     Text("原项目", style = MaterialTheme.typography.labelMedium, color = AppMuted)
                     Text("OppoCustomSideButtonFunctions", modifier = Modifier.padding(top = 4.dp))
