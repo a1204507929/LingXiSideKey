@@ -38,11 +38,16 @@ object EnvStatus {
     private const val KSUD = "/data/adb/ksu/bin/ksud"
 
     /**
-     * Root 是否已激活：su 节点存在即认为内核 root 已挂载；
-     * 否则再尝试执行一次 `su -c id` 兜底（覆盖 su 不在常见路径的 Magisk 类环境）。
+     * Root 是否已激活，按可靠性依次探测：
+     *  1. su 节点直接可见（仅当本 App 已被 KSU 授权挂载时才会命中）；
+     *  2. KernelSU / Magisk 守护进程常驻 —— root 晚加载激活后 ksud 会一直在跑，
+     *     而 /proc/<pid>/cmdline 无需任何权限即可读，这是「内核 root 已挂载」
+     *     在未授权 App 侧唯一可靠的信号（su 文件探测对本 App 不可见，会误报）；
+     *  3. 兜底：尝试执行一次 `su -c id`。
      */
     fun isRootActive(): Boolean {
         if (SU_PATHS.any { File(it).exists() }) return true
+        if (rootDaemonRunning()) return true
         val bin = SU_PATHS.firstOrNull { File(it).canExecute() } ?: return false
         return runCatching {
             val process = Runtime.getRuntime().exec(arrayOf(bin, "-c", "id"))
@@ -51,6 +56,17 @@ object EnvStatus {
             finished && process.exitValue() == 0
         }.getOrDefault(false)
     }
+
+    /** 扫描 /proc 查找 KernelSU（ksud）或 Magisk（magiskd）守护进程。 */
+    private fun rootDaemonRunning(): Boolean = runCatching {
+        File("/proc").listFiles { f -> f.name.all(Char::isDigit) }?.any { dir ->
+            runCatching {
+                val cmd = dir.resolve("cmdline").readBytes().toString(Charsets.UTF_8)
+                cmd.startsWith("ksud") || cmd.startsWith("/data/adb/ksu/bin/ksud") ||
+                    cmd.startsWith("magiskd") || cmd.startsWith("/data/adb/magisk")
+            }.getOrDefault(false)
+        } ?: false
+    }.getOrDefault(false)
 
     /** 框架管理器是否已安装（Vector / LSPosed 任一），返回命中的包名。 */
     fun frameworkPackage(context: Context): String? = FRAMEWORK_PACKAGES.firstOrNull { pkg ->

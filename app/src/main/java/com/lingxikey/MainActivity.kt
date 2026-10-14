@@ -70,6 +70,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Apps
@@ -702,9 +703,15 @@ private fun EnvStatusRow() {
                 false -> Color(0xFFD9534F)
             },
             onClick = {
+                clickSound(view)
                 if (rootActive == true) {
                     Toast.makeText(context, "Root 已激活", Toast.LENGTH_SHORT).show()
                 } else {
+                    // 点击时先重新探测一次：从 GhostLock 回来后不用重启 App 也能刷新状态。
+                    Thread {
+                        val active = runCatching { EnvStatus.isRootActive() }.getOrDefault(false)
+                        rootActive = active
+                    }.start()
                     val opened = runCatching { EnvStatus.openGhostLock(context) }.getOrDefault(false)
                     if (!opened) {
                         Toast.makeText(context, "未安装 GhostLock，无法激活 root", Toast.LENGTH_SHORT).show()
@@ -1081,6 +1088,7 @@ private fun ScopeCheckCard() {
     val view = LocalView.current
     val service = XposedServiceManager.xposedService
     var scope by remember { mutableStateOf<List<String>?>(null) }
+    var installed by remember { mutableStateOf<Set<String>?>(null) }
     var message by remember { mutableStateOf<String?>(null) }
     var requesting by remember { mutableStateOf(false) }
     var showManualDialog by remember { mutableStateOf(false) }
@@ -1091,11 +1099,21 @@ private fun ScopeCheckCard() {
     }
 
     LaunchedEffect(service) {
+        installed = withContext(Dispatchers.IO) {
+            val pm = context.packageManager
+            ModuleScope.allPackages.filter { pkg ->
+                runCatching { pm.getPackageInfo(pkg, 0) }.isSuccess
+            }.toSet()
+        }
         if (service != null) refresh()
     }
 
     val current = scope
+    val inst = installed
+    // 缺失的作用域拆成两类：装了的才值得申请 / 展示为红；没装的是历史遗留声明，忽略即可。
     val missingAll = if (current != null) ModuleScope.missing(current) else emptyList()
+    val actionableMissing = if (inst != null) missingAll.filter { it in inst } else missingAll
+    val ignorableMissing = if (inst != null) missingAll.filterNot { it in inst } else emptyList()
     val missingRequired = if (current != null) ModuleScope.missingRequired(current) else emptyList()
 
     Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, AppBorder)) {
@@ -1112,11 +1130,20 @@ private fun ScopeCheckCard() {
                 else -> {
                     ModuleScope.entries.forEach { entry ->
                         val checked = ModuleScope.isChecked(current, entry.packageName)
+                        val notInstalled = inst != null && entry.packageName !in inst
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                if (checked) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                                when {
+                                    checked -> Icons.Default.CheckCircle
+                                    notInstalled -> Icons.Default.HelpOutline
+                                    else -> Icons.Default.RadioButtonUnchecked
+                                },
                                 contentDescription = null,
-                                tint = if (checked) Color(0xFF2E9E5B) else Color(0xFFD9534F),
+                                tint = when {
+                                    checked -> Color(0xFF2E9E5B)
+                                    notInstalled -> Color(0xFF9AA5B1)
+                                    else -> Color(0xFFD9534F)
+                                },
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(8.dp))
@@ -1125,13 +1152,25 @@ private fun ScopeCheckCard() {
                                     entry.label + if (entry.required) "（必需）" else "",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
-                                Text(entry.description, style = MaterialTheme.typography.labelSmall, color = AppMuted)
+                                Text(
+                                    if (notInstalled) "本机未安装该应用，此作用域可忽略" else entry.description,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = AppMuted
+                                )
                             }
                         }
                     }
 
-                    if (missingAll.isEmpty()) {
-                        Text("全部已勾选，模块功能完整。", style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E9E5B))
+                    if (actionableMissing.isEmpty()) {
+                        if (ignorableMissing.isEmpty()) {
+                            Text("全部已勾选，模块功能完整。", style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E9E5B))
+                        } else {
+                            Text(
+                                "需要的作用域已齐全（未勾选的项本机未安装，可忽略）。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF2E9E5B)
+                            )
+                        }
                     } else {
                         Text(
                             buildString {
@@ -1141,9 +1180,15 @@ private fun ScopeCheckCard() {
                                     append("有功能缺少作用域，对应操作会静默失效。")
                                 }
                                 append("缺：")
-                                append(missingAll.joinToString("、") {
+                                append(actionableMissing.joinToString("、") {
                                     ModuleScope.entries.first { e -> e.packageName == it }.label
                                 })
+                                if (ignorableMissing.isNotEmpty()) {
+                                    append("；另有本机未安装的可忽略项：")
+                                    append(ignorableMissing.joinToString("、") {
+                                        ModuleScope.entries.first { e -> e.packageName == it }.label
+                                    })
+                                }
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFFD9534F)
@@ -1155,7 +1200,8 @@ private fun ScopeCheckCard() {
                                 requesting = true
                                 message = null
                                 runCatching {
-                                    svc.requestScope(missingAll, object : XposedService.OnScopeEventListener {
+                                    // 只申请「缺失且本机已安装」的作用域，避免框架因包不存在而报 Package not found。
+                                    svc.requestScope(actionableMissing, object : XposedService.OnScopeEventListener {
                                         override fun onScopeRequestApproved(approved: MutableList<String>) {
                                             message = "已申请：" + approved.joinToString("、")
                                             requesting = false
@@ -1163,7 +1209,8 @@ private fun ScopeCheckCard() {
                                         }
 
                                         override fun onScopeRequestFailed(reason: String) {
-                                            message = "申请失败：$reason"
+                                            message = "申请失败：$reason。" +
+                                                "若管理器里显示已勾选，请软重启系统框架后点「重新检查」"
                                             requesting = false
                                         }
                                     })
@@ -1187,7 +1234,7 @@ private fun ScopeCheckCard() {
                         TextButton(onClick = {
                             clickSound(view)
                             refresh()
-                            Toast.makeText(context, scopeCheckResultText(), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, scopeCheckResultText(context), Toast.LENGTH_SHORT).show()
                         }) { Text("重新检查") }
                         Spacer(Modifier.weight(1f))
                         TextButton(onClick = { clickSound(view); showManualDialog = true }) { Text("如何手动勾选") }
@@ -1202,12 +1249,16 @@ private fun ScopeCheckCard() {
     }
 }
 
-/** 重新读取作用域后给用户的吐司摘要。 */
-private fun scopeCheckResultText(): String {
+/** 重新读取作用域后给用户的吐司摘要（本机未安装的作用域视为可忽略，不计入缺失）。 */
+private fun scopeCheckResultText(context: android.content.Context): String {
     val current = runCatching { XposedServiceManager.xposedService?.scope }.getOrNull()
         ?: return "无法读取作用域：模块当前未激活"
-    val missing = ModuleScope.missing(current)
-    if (missing.isEmpty()) return "作用域检查完成：全部已勾选 ✓"
+    val pm = context.packageManager
+    val installed = ModuleScope.allPackages.filterTo(mutableSetOf()) { pkg ->
+        runCatching { pm.getPackageInfo(pkg, 0) }.isSuccess
+    }
+    val missing = ModuleScope.missing(current).filter { it in installed }
+    if (missing.isEmpty()) return "作用域检查完成：需要的作用域已全部勾选 ✓"
     val labels = missing.map { pkg -> ModuleScope.entries.first { it.packageName == pkg }.label }
     val prefix = if (ModuleScope.missingRequired(current).isNotEmpty()) "缺少必需作用域：" else "缺少可选作用域："
     return "作用域检查完成：$prefix${labels.joinToString("、")}"

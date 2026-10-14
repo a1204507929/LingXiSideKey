@@ -1,9 +1,3 @@
 android
-system
-com.android.systemui
 com.oplus.camera
-com.coloros.alarmclock
-com.coloros.sceneservice
-com.coloros.smartsidebar
-com.heytap.speechassist
 com.coloros.shortcuts
