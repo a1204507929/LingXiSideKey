@@ -1,6 +1,6 @@
 # 灵犀按键自定义
 
-通过 Xposed/LSPosed 为 OPPO / 一加 等设备的「灵犀」侧边按键配置操作，区分单击、双击与长按，桌面与息屏均可用，游戏内保留原厂灵犀功能。应用提供 Compose 设置界面，按键拦截与动作执行主要运行在 Android 系统框架进程中。包名为 `com.lingxikey.custom`。
+当初就是冲着 OPPO K15 Pro+ 的造型买的，到手最喜欢侧面那颗「灵犀」按键，结果发现它能干的事太少，于是自己写了个 App：基于 Xposed/LSPosed 框架，给灵犀键自定义单击、双击、长按动作，桌面与息屏均可用，游戏内自动放行原厂灵犀功能。按键拦截与动作执行运行在系统框架进程中，设置界面用 Compose 编写。包名 `io.github.a1204507929.lingxikey`。
 
 > 本模块基于 [SlimeNull/OppoCustomSideButtonFunctions](https://github.com/SlimeNull/OppoCustomSideButtonFunctions) 二次开发，
 > 针对 OPPO K15 Pro+（ColorOS 16 / Android 16）重新适配了按键拦截点与手势码。在此感谢原作者的出色工作。
@@ -18,7 +18,7 @@
 > 开源地址：<https://github.com/a1204507929/LingXiSideKey>
 
 <div align="center">
-  <img src="images/preview.webp" alt="preview image" >
+  <img src="images/preview.png" alt="preview image" >
 </div>
 
 ## 安装与启用

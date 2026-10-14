@@ -15,11 +15,11 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.lingxikey.custom"
+        applicationId = "io.github.a1204507929.lingxikey"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.0.8"
+        versionCode = 10
+        versionName = "1.0.9"
     }
 
     signingConfigs {

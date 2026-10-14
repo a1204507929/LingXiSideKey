@@ -1292,7 +1292,7 @@ private fun AboutScreen(padding: PaddingValues) {
             Spacer(Modifier.height(16.dp))
             Text("灵犀按键自定义", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text("让你的灵犀键，做更多的事", color = AppMuted, modifier = Modifier.padding(top = 6.dp))
-            Text("com.lingxikey.custom", style = MaterialTheme.typography.bodySmall, color = AppMuted, modifier = Modifier.padding(top = 8.dp))
+            Text(BuildConfig.APPLICATION_ID, style = MaterialTheme.typography.bodySmall, color = AppMuted, modifier = Modifier.padding(top = 8.dp))
             Text("版本 ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodySmall, color = AppMuted)
           }
            item {

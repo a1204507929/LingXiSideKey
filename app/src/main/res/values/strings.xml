@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">灵犀按键自定义</string>
-    <string name="xposed_description">为 OPPO / 一加「灵犀」侧边按键自定义单击、双击与长按动作</string>
+    <string name="xposed_description">让 OPPO K15 Pro+ 的灵犀按键做更多事：单击 / 双击 / 长按自定义动作，支持按应用配置、风扇、灯效、打开任意应用</string>
 </resources>
