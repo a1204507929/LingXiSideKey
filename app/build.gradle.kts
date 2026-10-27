@@ -22,6 +22,18 @@ android {
         versionName = "1.1.0"
     }
 
+    flavorDimensions += "framework"
+    productFlavors {
+        create("vector") {
+            // 沿用 main 资源：scope=system / module.prop API 102（Vector/libxposed）
+            dimension = "framework"
+        }
+        create("lsposed") {
+            // 覆盖 META-INF/xposed 资源：scope=android / module.prop API 93（LSPosed）
+            dimension = "framework"
+        }
+    }
+
     signingConfigs {
         create("release") {
             val storePath = signingProperties.getProperty("storeFile")
